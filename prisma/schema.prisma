@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String
+  excerpt       String
+  content       String
+  coverImage    String?
+  published     Boolean  @default(false)
+  featured      Boolean  @default(false)
+  publishedAt   DateTime?
+  readingTime   Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  tags          Tag[]    @relation("PostTags")
+
+  @@index([published, publishedAt])
+  @@index([featured, publishedAt])
+  @@index([slug])
+}
+
+model Tag {
+  id        String  @id @default(cuid())
+  name      String  @unique
+  slug      String  @unique
+  posts     Post[]  @relation("PostTags")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  title        String
+  description  String
+  content      String?
+  image        String?
+  githubUrl    String?
+  liveUrl      String?
+  featured     Boolean  @default(false)
+  technologies String[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([featured])
+  @@index([slug])
+}
+
+model Repository {
+  id              String   @id @default(cuid())
+  githubId        Int      @unique
+  slug            String   @unique
+  name            String
+  fullName        String
+  description     String?
+  htmlUrl         String?   // Made nullable
+  homepageUrl     String?
+  primaryLanguage String?
+  languages       Json?    // { language: bytes }
+  topics          String[]
+  stars           Int      @default(0)
+  forks           Int      @default(0)
+  openIssues      Int      @default(0)
+  license         String?
+  createdAt       DateTime
+  updatedAt       DateTime
+  pushedAt        DateTime?
+  defaultBranch   String?
+  isArchived      Boolean  @default(false)
+  isFork          Boolean  @default(false)
+  visibility      String
+  ownerLogin      String
+  readmeContent   String?
+
+  // Portfolio metadata (manual overlay)
+  featured        Boolean  @default(false)
+  priority        Int      @default(0)
+  category        String?  // Backend / AI / Architecture / Tooling / Other
+  customDescription String?
+  customTechnologies String[]
+  whyIBuiltIt     String?
+  architecture    String?
+  challenges      String?
+  whatILearned    String?
+
+  // Sync metadata
+  lastSyncedAt    DateTime @default(now())
+  syncedAt        DateTime @default(now())
+
+  @@index([featured])
+  @@index([priority])
+  @@index([category])
+  @@index([primaryLanguage])
+  @@index([updatedAt])
+  @@index([pushedAt])
+  @@index([stars])
+  @@index([ownerLogin])
+  @@index([slug])
+}
+
+model GitHubUser {
+  id              String   @id @default(cuid())
+  githubId        Int      @unique
+  login           String   @unique
+  name            String?
+  bio             String?
+  company         String?
+  location        String?
+  email           String?
+  twitterUsername String?
+  publicRepos     Int      @default(0)
+  publicGists     Int      @default(0)
+  followers       Int      @default(0)
+  following       Int      @default(0)
+  createdAt       DateTime
+  updatedAt       DateTime
+  lastSyncedAt    DateTime @default(now())
+  avatarUrl       String?
+  htmlUrl         String
+
+  @@index([login])
+}
+
+model SyncLog {
+  id          String   @id @default(cuid())
+  type        String   // "repositories" | "user"
+  status      String   // "success" | "error" | "partial"
+  itemsSynced Int      @default(0)
+  errorMessage String?
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+
+  @@index([type, status])
+  @@index([startedAt])
+}
+
+model ScheduledJob {
+  id           String   @id @default(cuid())
+  jobId        String   @unique
+  name         String
+  status       String   @default("pending") // pending | running | success | error
+  lastRunAt    DateTime?
+  nextRunAt    DateTime?
+  result       Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([jobId])
+  @@index([status])
+}
+
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+model ChatRequest {
+  id        String   @id @default(cuid())
+  ip        String
+  question  String
+  createdAt DateTime @default(now())
+
+  @@index([ip, createdAt])
+  @@index([createdAt])
+}
