@@ -116,10 +116,9 @@ export default function RootLayout({
         <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
       </head>
       <body className="min-h-screen bg-background font-sans antialiased">
-        <Providers>{children}</Providers>
         <Navbar />
         <main id="main-content" className="pt-16">
-          {children}
+          <Providers>{children}</Providers>
         </main>
         <Footer />
       </body>
