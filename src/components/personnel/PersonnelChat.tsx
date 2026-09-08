@@ -23,10 +23,19 @@ export function PersonnelChat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question }),
       })
-      const data = await response.json()
+      const raw = await response.text()
+      let data: { answer?: string; count?: number; error?: string }
+      try {
+        data = JSON.parse(raw)
+      } catch {
+        // Reverse proxy / Cloudflare may swap 5xx bodies for HTML pages —
+        // surface a clean Persian message instead of a JSON parse crash.
+        setError('سرویس پاسخ‌گویی موقتاً در دسترس نیست. دقایقی بعد دوباره تلاش کنید.')
+        return
+      }
       if (!response.ok) throw new Error(data.error || 'خطایی رخ داد.')
-      setAnswer(data.answer)
-      setCount(data.count)
+      setAnswer(data.answer ?? '')
+      setCount(data.count ?? null)
       setQuestion('')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'خطایی رخ داد.')
