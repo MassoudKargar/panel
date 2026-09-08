@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
         'X-API-Key': process.env.RAG_API_KEY || '',
       },
       body: JSON.stringify({
-        model: process.env.RAG_CHAT_MODEL || 'nvidia/nemotron-3-nano-30b-a3b:free',
+        model: process.env.RAG_CHAT_MODEL || 'deepseek/deepseek-v4-flash-0731',
         messages: [{ role: 'user', content: question }],
         stream: false,
       }),
